@@ -70,7 +70,9 @@ func parse(cfg internal.RCTConfig) {
 		}
 		args := flag.Args()
 		txt := args[0]
-		fmt.Fprintf(os.Stdout, "sending text: %s", txt)
+		if *verboseBase {
+			fmt.Fprintf(os.Stdout, "sending text: %s", txt)
+		}
 		b := deliver(cfg.Delivery, txt, *verboseBase)
 		if b {
 			fmt.Fprintf(os.Stderr, "error: failed to send\n")
