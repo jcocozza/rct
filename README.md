@@ -1,6 +1,6 @@
 # rct
 
-rcp stands for remote copy text.
+rct stands for remote copy text.
 
 I've found that when I'm working remotely, there hasn't been a good way to copy text from remote to local.
 This project is an attempt to solve this problem.
