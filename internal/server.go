@@ -15,6 +15,7 @@ type Server struct {
 	// if a client does not send the correct token, then no data will be received and the connection will be closed
 	token string
 	tokenRequired bool
+	clipboard Clipboard
 }
 
 func NewServer(addr string, tkn string) *Server {
@@ -23,6 +24,7 @@ func NewServer(addr string, tkn string) *Server {
 		Addr: addr,
 		token: tkn,
 		tokenRequired: tknRequired,
+		clipboard: &clipper{},
 	}
 }
 
@@ -72,7 +74,11 @@ func (s *Server) handleConnection(conn net.Conn) {
 		return
 	}
 	// process message
-	fmt.Println(string(msgBuf))
+	err = s.clipboard.Write(msgBuf)
+	if err != nil {
+		_ = respondError(conn, fmt.Errorf("failed to write to clipboard: %w", err))
+		return
+	}
 }
 
 func (s *Server) Run() {
