@@ -40,18 +40,25 @@ func runListen(cfg internal.RCTConfig) {
 	if listenVerbose {
 		fmt.Fprintf(os.Stdout, "listening on %s\n", s.Addr)
 	}
+	// run the server as detached
 	if detach {
 		pid, err := s.RunDetached()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "failed to start listening: %s", err.Error())
+			fmt.Fprintf(os.Stderr, "failed to start listening: %s\n", err.Error())
 			os.Exit(1)
 		}
 		fmt.Fprintf(os.Stdout, "rct listening on: %d\n", pid)
 		os.Exit(0)
 		return
 	}
-
-	go s.Run()
+	// in verbose, we spawn the server and then block
+	// the server will push text to the results chan for printing
+	go func() {
+		err := s.Run()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to start listening %s\n", err.Error())
+		}
+	}()
 	for t := range results {
 		if listenVerbose {
 			v := drawTextBox(t)

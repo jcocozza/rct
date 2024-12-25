@@ -90,26 +90,33 @@ func (s *Server) handleConnection(conn net.Conn) {
 	}
 }
 
-func (s *Server) Run() {
+func (s *Server) isAlive() bool {
+	conn, err := net.Dial("tcp", s.Addr)
+	if err != nil {
+		return false
+	}
+	_ = conn.Close()
+	return true
+}
+
+func (s *Server) Run() error {
+	if s.isAlive() {
+		return fmt.Errorf("server is already running")
+	}
 	listen, err := net.Listen("tcp", s.Addr)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to start listening: %s", err.Error())
 	}
 	defer listen.Close()
 
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
-			panic(err)
+			// TODO: handle these nicely
+			continue
 		}
 		s.handleConnection(conn)
 	}
-}
-
-// TODO: get good logic for this
-// probably want to just try an ping based on config
-func (s *Server) isAlive() bool {
-	return false
 }
 
 // call the executable in its own process
