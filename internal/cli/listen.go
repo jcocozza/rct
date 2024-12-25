@@ -19,6 +19,11 @@ func parseListen() {
 	listen.BoolVar(&listenVerbose, "v", false, "verbosity")
 	listen.BoolVar(&detach, "d", false, "detach the session and listen in the background")
 
+	listen.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s listen [OPTIONS]\n", os.Args[0])
+		listen.PrintDefaults()
+	}
+
 	// args[0] = app name
 	// args[1] = "listen"
 	err := listen.Parse(os.Args[2:])
@@ -47,7 +52,7 @@ func runListen(cfg internal.RCTConfig) {
 			fmt.Fprintf(os.Stderr, "failed to start listening: %s\n", err.Error())
 			os.Exit(1)
 		}
-		fmt.Fprintf(os.Stdout, "rct listening on: %d\n", pid)
+		fmt.Fprintf(os.Stdout, "%d\n", pid)
 		os.Exit(0)
 		return
 	}

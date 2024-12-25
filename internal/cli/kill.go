@@ -10,12 +10,13 @@ import (
 
 func parseKill() {
 	kill := flag.NewFlagSet("kill", flag.ExitOnError)
-	// args[0] = app name
-	// args[1] = "kill"
 	kill.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s kill\n", os.Args[0])
+		fmt.Fprint(os.Stderr, "  kill the background listener\n")
 		kill.PrintDefaults()
 	}
+	// args[0] = app name
+	// args[1] = "kill"
 	err := kill.Parse(os.Args[2:])
 	if err != nil {
 		kill.Usage()

@@ -16,6 +16,13 @@ var (
 func parseSend() string {
 	send := flag.NewFlagSet("", flag.ExitOnError)
 	send.BoolVar(&sendVerbose, "v", false, "verbosity")
+
+	send.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] <text to send>\n", os.Args[0])
+		fmt.Fprint(os.Stderr, "  send to the configured server\n")
+		send.PrintDefaults()
+	}
+
 	// args[0] = app name
 	err := send.Parse(os.Args[1:])
 	if err != nil {
@@ -23,7 +30,7 @@ func parseSend() string {
 		os.Exit(1)
 	}
 	if send.NArg() != 1 {
-		fmt.Fprintf(os.Stderr, "error: expects a single string of text")
+		fmt.Fprintf(os.Stderr, "error: expects a single string of text\n")
 		send.Usage()
 		os.Exit(1)
 	}
