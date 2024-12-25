@@ -24,6 +24,9 @@ func Execute() {
 	case "listen":
 		parseListen()
 		runListen(cfg)
+	case "kill":
+		parseKill()
+		runKill()
 	default:
 		txt := parseSend()
 		runSend(cfg, txt)

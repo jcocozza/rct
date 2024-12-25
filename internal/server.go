@@ -8,7 +8,26 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strconv"
 )
+
+const pid_file string = "rct.pid"
+
+func savePID(pid int) error {
+	tmp := os.TempDir()
+	p := filepath.Join(tmp, pid_file)
+
+	f, err := os.Create(p)
+	if err != nil {
+		return fmt.Errorf("failed to create pid file: %w", err)
+	}
+	_, err = f.WriteString(strconv.Itoa(pid))
+	if err != nil {
+		return fmt.Errorf("failed to write pid: %w", err)
+	}
+	return nil
+}
 
 type Server struct {
 	// Where the server will listen
@@ -136,6 +155,10 @@ func (s *Server) RunDetached() (int, error) {
 	cmd.Stderr = nil
 	if err := cmd.Start(); err != nil {
 		return -1, err
+	}
+	err = savePID(cmd.Process.Pid)
+	if err != nil {
+		return cmd.Process.Pid, err
 	}
 	return cmd.Process.Pid, nil
 }
