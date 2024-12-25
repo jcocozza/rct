@@ -19,6 +19,7 @@ build-windows:
 
 build-macos:
 	GOOS=darwin GOARCH=amd64 go build $(GOFLAGS) -ldflags="$(LDFLAGS)" -o $(OUTPUT_DIR)/$(BINARY_NAME)-darwin-amd64 cmd/main.go
+	codesign -s - $(OUTPUT_DIR)/$(BINARY_NAME)
 
 # Clean up built binaries
 clean:
