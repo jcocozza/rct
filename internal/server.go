@@ -6,28 +6,29 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"strings"
+	"os"
+	"os/exec"
 )
 
 type Server struct {
 	// Where the server will listen
-	Addr  string
+	Addr string
 	// the token that clients will have to send to validate
 	// if a client does not send the correct token, then no data will be received and the connection will be closed
-	token string
+	token         string
 	tokenRequired bool
-	clipboard Clipboard
-	results chan string
+	clipboard     Clipboard
+	results       chan string
 }
 
 func NewServer(addr string, tkn string, results chan string) *Server {
 	tknRequired := tkn != ""
 	return &Server{
-		Addr: addr,
-		token: tkn,
+		Addr:          addr,
+		token:         tkn,
 		tokenRequired: tknRequired,
-		clipboard: &clipper{},
-		results: results,
+		clipboard:     &clipper{},
+		results:       results,
 	}
 }
 
@@ -77,9 +78,9 @@ func (s *Server) handleConnection(conn net.Conn) {
 		return
 	}
 	// process message
-	t := []byte(strings.ReplaceAll(string(msgBuf), `\n`, "\n"))
-	//err = s.clipboard.Write(msgBuf)
-	err = s.clipboard.Write(t)
+	//t := []byte(strings.ReplaceAll(string(msgBuf), `\n`, "\n"))
+	//err = s.clipboard.Write(t)
+	err = s.clipboard.Write(msgBuf)
 	if err != nil {
 		_ = respondError(conn, fmt.Errorf("failed to write to clipboard: %w", err))
 		return
@@ -103,4 +104,31 @@ func (s *Server) Run() {
 		}
 		s.handleConnection(conn)
 	}
+}
+
+// TODO: get good logic for this
+// probably want to just try an ping based on config
+func (s *Server) isAlive() bool {
+	return false
+}
+
+// call the executable in its own process
+// return pid if success. -1 if failed to start
+func (s *Server) RunDetached() (int, error) {
+	if s.isAlive() {
+		return -1, fmt.Errorf("server is already running")
+	}
+	exe, err := os.Executable()
+	if err != nil {
+		return -1, err
+	}
+	cmd := exec.Command(exe, "listen")
+
+	cmd.Stdin = nil
+	cmd.Stdout = nil
+	cmd.Stderr = nil
+	if err := cmd.Start(); err != nil {
+		return -1, err
+	}
+	return cmd.Process.Pid, nil
 }

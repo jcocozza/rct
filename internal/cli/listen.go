@@ -40,6 +40,17 @@ func runListen(cfg internal.RCTConfig) {
 	if listenVerbose {
 		fmt.Fprintf(os.Stdout, "listening on %s\n", s.Addr)
 	}
+	if detach {
+		pid, err := s.RunDetached()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to start listening: %s", err.Error())
+			os.Exit(1)
+		}
+		fmt.Fprintf(os.Stdout, "rct listening on: %d\n", pid)
+		os.Exit(0)
+		return
+	}
+
 	go s.Run()
 	for t := range results {
 		if listenVerbose {

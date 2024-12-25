@@ -12,6 +12,7 @@ var (
 	sendVerbose bool
 )
 
+// returns the text to send
 func parseSend() string {
 	send := flag.NewFlagSet("", flag.ExitOnError)
 	send.BoolVar(&sendVerbose, "v", false, "verbosity")
