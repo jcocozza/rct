@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 )
 
 type Server struct {
@@ -16,15 +17,17 @@ type Server struct {
 	token string
 	tokenRequired bool
 	clipboard Clipboard
+	results chan string
 }
 
-func NewServer(addr string, tkn string) *Server {
+func NewServer(addr string, tkn string, results chan string) *Server {
 	tknRequired := tkn != ""
 	return &Server{
 		Addr: addr,
 		token: tkn,
 		tokenRequired: tknRequired,
 		clipboard: &clipper{},
+		results: results,
 	}
 }
 
@@ -74,10 +77,15 @@ func (s *Server) handleConnection(conn net.Conn) {
 		return
 	}
 	// process message
-	err = s.clipboard.Write(msgBuf)
+	t := []byte(strings.ReplaceAll(string(msgBuf), `\n`, "\n"))
+	//err = s.clipboard.Write(msgBuf)
+	err = s.clipboard.Write(t)
 	if err != nil {
 		_ = respondError(conn, fmt.Errorf("failed to write to clipboard: %w", err))
 		return
+	}
+	if s.results != nil {
+		s.results <- string(msgBuf)
 	}
 }
 

@@ -1,6 +1,6 @@
 package internal
 
-import "fmt"
+import "github.com/f1bonacc1/glippy"
 
 type Clipboard interface {
 	// write to the system clipboard
@@ -8,10 +8,9 @@ type Clipboard interface {
 }
 
 // a mock clipboard interface until i implement properly
-type clipper struct {}
+type clipper struct{}
 
 func (c *clipper) Write(data []byte) error {
 	s := string(data)
-	fmt.Println(s)
-	return nil
+	return glippy.Set(s)
 }
