@@ -14,7 +14,7 @@ The requirements for this project is as follows:
 
 2. Exclusive remote/client relationship (only verified machines can send data)
 
-- the config file supports including a token which all data will have to be sent with
+- the config file supports adding a token. This essentially acts as an API key that needs to be included with any request to the rct server.
 
 ## Setup
 
@@ -32,12 +32,12 @@ This can be more then one address which allows you to send data to more then one
 ```json
 {
   "server": {
-    "addr": "10.0.0.6:8080", # this is the address of your local machine and the port to listen on
+    "addr": "10.0.0.6:8080", # the address that rct will run the listen server (in this case, 10.0.0.6 is the address of the local machine)
     "token": ""
   },
   "delivery": [ # these addresses are for sending data
     {
-      "addr": "10.0.0.6:8080",
+      "addr": "10.0.0.8:8080",
       "token": ""
     }
   ]
@@ -72,7 +72,8 @@ rct 'my message' # this will deliver 'my message' to the local machine's clipboa
 ```
 +-------------------+        +-------------------+                   +------------------+
 |       local       |  <---  |       local       | <---- (tcp) ----> |      remote      |
-|     (clipboard)   |        |    (rct server)   |                   |   (rct client)   |
+|                   |        |    (rct server)   |                   |   (rct client)   |
+|     (clipboard)   |        |     (10.0.0.6)    |                   |    (10.0.0.8)    |
 +-------------------+        +-------------------+                   +------------------+
 ```
 
@@ -83,3 +84,39 @@ The client pushes data to the server where it is copied to the system clipboard.
 
 As such, the intended use of rct is running the rct server on your local machine as a background process with the rct client on the remote.
 (Typically, it is very easy to copy locally and paste into remote. The reverse is usually not so easy.)
+
+## Example
+
+Using the diagram above, we have 2 config files (one on each machine).
+Notice that delivery on one matches server on the other (and vice versa).
+1. On remote (10.0.0.8)
+```json
+{
+  "server": {
+    "addr": "10.0.0.8:8080",
+    "token": ""
+  },
+  "delivery": [
+    {
+      "addr": "10.0.0.6:8080",
+      "token": ""
+    }
+  ]
+}
+```
+2. On local (10.0.0.6)
+```json
+{
+  "server": {
+    "addr": "10.0.0.6:8080",
+    "token": ""
+  },
+  "delivery": [
+    {
+      "addr": "10.0.0.8:8080",
+      "token": ""
+    }
+  ]
+}
+```
+
