@@ -9,11 +9,12 @@ This project is an attempt to solve this problem.
 The requirements for this project is as follows:
 
 1. Copy from remote to local should be simple.
-  - on remote, simply call `rct <my text>` (provided `rct listen` has been called on local)
+
+- on remote, simply call `rct <my text>` (provided `rct listen` has been called on local)
+
 2. Exclusive remote/client relationship (only verified machines can send data)
-  - the config file supports including a token which all data will have to be sent with
-3. End-to-End encryption
-  - TODO
+
+- the config file supports including a token which all data will have to be sent with
 
 ## Setup
 
