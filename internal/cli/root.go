@@ -2,7 +2,9 @@ package cli
 
 import (
 	"fmt"
+	"io"
 	"os"
+	"strings"
 
 	"github.com/jcocozza/rct/internal"
 	"github.com/spf13/cobra"
@@ -12,6 +14,15 @@ const version string = "0.0.1"
 
 // initalized when cli is called
 var cfg internal.RCTConfig
+
+func handleStdin() string {
+	b, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error reading from stdin: %s", err.Error())
+		os.Exit(1)
+	}
+	return strings.TrimSpace(string(b))
+}
 
 func runSend(c internal.RCTConfig, txt string) {
 	if verbose {
@@ -30,9 +41,20 @@ var rootCmd = &cobra.Command{
 	Use:     "rct [text to send]",
 	Version: version,
 	Short:   "rct is a tool for sending text between remote and local",
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		txt := args[0]
+		stat, _ := os.Stdin.Stat()
+		useStdin := (stat.Mode() & os.ModeCharDevice) == 0
+		var txt string
+		if useStdin {
+			txt = handleStdin()
+		} else {
+			if len(args) == 0 {
+				fmt.Fprintf(os.Stderr, "error: expected text (one arguement)\n")
+				os.Exit(1)
+			}
+			txt = args[0]
+		}
 		runSend(cfg, txt)
 	},
 }
