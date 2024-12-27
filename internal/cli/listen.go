@@ -1,48 +1,23 @@
 package cli
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
 	"github.com/jcocozza/rct/internal"
+	"github.com/spf13/cobra"
 )
 
-var (
-	listenVerbose bool
-	detach bool
-	results chan string
-)
-
-func parseListen() {
-	listen := flag.NewFlagSet("listen", flag.ExitOnError)
-	listen.BoolVar(&listenVerbose, "v", false, "verbosity")
-	listen.BoolVar(&detach, "d", false, "detach the session and listen in the background")
-
-	listen.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s listen [OPTIONS]\n", os.Args[0])
-		listen.PrintDefaults()
-	}
-
-	// args[0] = app name
-	// args[1] = "listen"
-	err := listen.Parse(os.Args[2:])
-	if err != nil {
-		listen.Usage()
-		return
-	}
-	if listenVerbose && detach {
-		fmt.Fprintf(os.Stderr, "error: verbose and detach cannot both be set to true\n")
-		os.Exit(1)
-	}
-	if listenVerbose {
-		results = make(chan string, 1)
-	}
-}
+var verbose bool
+var detach bool
+var results chan string
 
 func runListen(cfg internal.RCTConfig) {
+	if verbose {
+		results = make(chan string, 1)
+	}
 	s := internal.NewServer(cfg.Server.Addr, cfg.Server.Token, results)
-	if listenVerbose {
+	if verbose {
 		fmt.Fprintf(os.Stdout, "listening on %s\n", s.Addr)
 	}
 	// run the server as detached
@@ -65,9 +40,25 @@ func runListen(cfg internal.RCTConfig) {
 		}
 	}()
 	for t := range results {
-		if listenVerbose {
+		if verbose {
 			v := drawTextBox(t)
 			fmt.Fprintf(os.Stdout, "received: \n%s\n", v)
 		}
 	}
+}
+
+var listenCmd = &cobra.Command{
+	Use:   "listen",
+	Short: "start listening",
+	Args:  cobra.ExactArgs(0),
+	Run: func(cmd *cobra.Command, args []string) {
+		runListen(cfg)
+	},
+}
+
+func init() {
+	listenCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "enable verbosity")
+	listenCmd.Flags().BoolVarP(&detach, "detach", "d", false, "detach the session and listen in background")
+	listenCmd.MarkFlagsMutuallyExclusive("verbose", "detach")
+	rootCmd.AddCommand(listenCmd)
 }

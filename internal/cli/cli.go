@@ -1,79 +1,56 @@
 package cli
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
 	"github.com/jcocozza/rct/internal"
+	"github.com/spf13/cobra"
 )
 
-const VERSION = "v0.0.1"
+const version string = "0.0.1"
 
-type command struct {
-	Name string
-	Usage string
-}
+// initalized when cli is called
+var cfg internal.RCTConfig
 
-var commands = map[string]command{
-	"listen": {
-		Name: "listen",
-		Usage: "start a listener",
-	},
-	"kill": {
-		Name: "kill",
-		Usage: "kill the listener",
-	},
-	"version": {
-		Name: "version",
-		Usage: "print version",
-	},
-	//"send": {
-	//	Name: "send",
-	//	Usage: "send text to server",
-	//},
-}
-
-func usage() {
-	fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] <text>\n", os.Args[0])
-	fmt.Fprintf(os.Stderr, "	or: %s <command> [OPTIONS]\n", os.Args[0])
-	fmt.Fprint(os.Stderr, "Commands:\n")
-	for _, cmd := range commands {
-		fmt.Fprintf(os.Stderr, "	%s	%s\n", cmd.Name, cmd.Usage)
+func runSend(c internal.RCTConfig, txt string) {
+	if verbose {
+		fmt.Fprintf(os.Stdout, "sending text:\n%s\n", drawTextBox(txt))
 	}
-	flag.PrintDefaults()
+	for _, host := range c.Delivery {
+		client := internal.NewClient(host.Addr, host.Token)
+		err := client.Send(txt)
+		if err != nil && verbose {
+			fmt.Fprintf(os.Stderr, "error: %s\n", err.Error())
+		}
+	}
+}
+
+var rootCmd = &cobra.Command{
+	Use:     "rct [text to send]",
+	Version: version,
+	Short:   "rct is a tool for sending text between remote and local",
+	Args: cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		txt := args[0]
+		runSend(cfg, txt)
+	},
+}
+
+func initConfig() {
+	c, err := internal.ReadConfig()
+	cobra.CheckErr(err)
+	cfg = c
+}
+
+func init() {
+	rootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "enable verbosity")
+	cobra.OnInitialize(initConfig)
 }
 
 func Execute() {
-	flag.Usage = usage
-	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, "error: expected 'listen' or text to send\n")
-		flag.Usage()
-		return
-	}
-	cfg, err := internal.ReadConfig()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: unable to read rct config: %s\n", err.Error())
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
-	}
-
-	switch os.Args[1] {
-	case "listen":
-		parseListen()
-		runListen(cfg)
-	case "kill":
-		parseKill()
-		runKill()
-	case "version":
-		version := flag.NewFlagSet("version", flag.ExitOnError)
-		err := version.Parse(os.Args[2:])
-		if err != nil {
-			version.Usage()
-			return
-		}
-		fmt.Fprintf(os.Stdout, "%s\n", VERSION)
-	default:
-		txt := parseSend()
-		runSend(cfg, txt)
 	}
 }
