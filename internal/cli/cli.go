@@ -8,6 +8,8 @@ import (
 	"github.com/jcocozza/rct/internal"
 )
 
+const VERSION = "v0.0.1"
+
 type command struct {
 	Name string
 	Usage string
@@ -21,6 +23,10 @@ var commands = map[string]command{
 	"kill": {
 		Name: "kill",
 		Usage: "kill the listener",
+	},
+	"version": {
+		Name: "version",
+		Usage: "print version",
 	},
 	//"send": {
 	//	Name: "send",
@@ -58,6 +64,14 @@ func Execute() {
 	case "kill":
 		parseKill()
 		runKill()
+	case "version":
+		version := flag.NewFlagSet("version", flag.ExitOnError)
+		err := version.Parse(os.Args[2:])
+		if err != nil {
+			version.Usage()
+			return
+		}
+		fmt.Fprintf(os.Stdout, "%s\n", VERSION)
 	default:
 		txt := parseSend()
 		runSend(cfg, txt)
