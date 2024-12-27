@@ -51,6 +51,9 @@ With the intended rct use case:
 - locally: you will care about `server`
 - remote: you will care about `delivery`
 
+I recommend adding rct to your path. (For example, by moving it to `/usr/local/bin`)
+From there, so you don't need to keep restarting the listener you can configure your local machine to run `rct listen -d` on start up.
+
 ## Basic Flow
 
 Assuming everything is set up properly, basic use is quite simple:
