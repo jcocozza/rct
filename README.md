@@ -87,6 +87,9 @@ As such, the intended use of rct is running the rct server on your local machine
 
 It is also important to not that the client will fail silently if verbose is not enabled.
 
+Where possible, rct tries to work with posix tools.
+For example `cat my_file.txt | rct` works just fine as a way to copy the text of a file to the local machine.
+
 ## Example
 
 Using the diagram above, we have 2 config files (one on each machine).
