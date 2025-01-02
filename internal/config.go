@@ -2,8 +2,11 @@ package internal
 
 import (
 	"encoding/json"
+	"fmt"
+	"net"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 const CFG_PATH = ".rct.json"
@@ -30,11 +33,40 @@ type Host struct {
 	Token string `json:"token"`
 }
 
+func (h Host) Validate() error {
+	host, port, err := net.SplitHostPort(h.Addr)
+	if err != nil {
+		return fmt.Errorf("invalid forma: %w", err)
+	}
+	portNum, err := strconv.Atoi(port)
+	if err != nil || portNum < 1 || portNum > 65535 {
+		return fmt.Errorf("invalid port: %s", port)
+	}
+	if net.ParseIP(host) == nil && len(host) == 0 {
+		return fmt.Errorf("invalid server: %s", host)
+	}
+	return nil
+}
+
 type RCTConfig struct {
 	// the host that will be started to listen for incoming
 	Server Host `json:"server"`
 	// tcp servers to try and send data to
 	Delivery []Host `json:"delivery"`
+}
+
+func (c RCTConfig) Validate() error {
+	err := c.Server.Validate()
+	if err != nil {
+		return err
+	}
+	for _, hst := range c.Delivery {
+		err := hst.Validate()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func readConfig(path string) (RCTConfig, error) {
@@ -44,6 +76,10 @@ func readConfig(path string) (RCTConfig, error) {
 	}
 	var sc RCTConfig
 	err = json.Unmarshal(fbytes, &sc)
+	if err != nil {
+		return RCTConfig{}, err
+	}
+	err = sc.Validate()
 	if err != nil {
 		return RCTConfig{}, err
 	}
@@ -57,4 +93,18 @@ func ReadConfig() (RCTConfig, error) {
 	}
 	configPath := filepath.Join(homeDir, CFG_PATH)
 	return readConfig(configPath)
+}
+
+func GenerateConfig(hostAddr string, deliveryAddrs []string) (RCTConfig, error) {
+	delivery := make([]Host, len(deliveryAddrs))
+	for i := range deliveryAddrs {
+		delivery[i] = Host{Addr: deliveryAddrs[i]}
+	}
+	hst := Host{Addr: hostAddr}
+	cfg := RCTConfig{
+		Server:   hst,
+		Delivery: delivery,
+	}
+	err := cfg.Validate()
+	return cfg, err
 }

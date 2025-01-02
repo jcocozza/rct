@@ -55,6 +55,7 @@ var rootCmd = &cobra.Command{
 			}
 			txt = args[0]
 		}
+		initConfig()
 		runSend(cfg, txt)
 	},
 }
@@ -67,7 +68,6 @@ func initConfig() {
 
 func init() {
 	rootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "enable verbosity")
-	cobra.OnInitialize(initConfig)
 }
 
 func Execute() {

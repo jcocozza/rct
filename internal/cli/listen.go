@@ -52,6 +52,7 @@ var listenCmd = &cobra.Command{
 	Short: "start listening",
 	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
+		initConfig()
 		runListen(cfg)
 	},
 }
