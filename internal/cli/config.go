@@ -15,12 +15,15 @@ var cfgCmd = &cobra.Command{
 	Long: "generate a config file for rct. if you'd like a server token, you must add to the config file yourself.",
 	Args: cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 2 {
-			fmt.Fprintf(os.Stderr, "need server address and at least 1 delivery address\n")
+		if len(args) < 1 {
+			fmt.Fprintf(os.Stderr, "at least server address is required\n")
 			os.Exit(1)
 		}
 		host := args[0]
-		deliveries := args[1:]
+		var deliveries []string
+		if len(args) > 1 {
+			deliveries = args[1:]
+		}
 		cfg, err := internal.GenerateConfig(host, deliveries)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "unable to generate config: %s\n", err.Error())

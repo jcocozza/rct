@@ -36,7 +36,7 @@ type Host struct {
 func (h Host) Validate() error {
 	host, port, err := net.SplitHostPort(h.Addr)
 	if err != nil {
-		return fmt.Errorf("invalid forma: %w", err)
+		return fmt.Errorf("invalid format: %w", err)
 	}
 	portNum, err := strconv.Atoi(port)
 	if err != nil || portNum < 1 || portNum > 65535 {
@@ -56,6 +56,9 @@ type RCTConfig struct {
 }
 
 func (c RCTConfig) Validate() error {
+	if c.Server.Addr == "" && len(c.Delivery) == 0 {
+		return fmt.Errorf("config must contain either server, delivery or both")
+	}
 	err := c.Server.Validate()
 	if err != nil {
 		return err
