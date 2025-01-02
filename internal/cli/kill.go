@@ -19,9 +19,9 @@ func runKill() {
 }
 
 var killCmd = &cobra.Command{
-	Use: "kill",
+	Use:   "kill",
 	Short: "kill the background listener if it is running",
-	Args: cobra.ExactArgs(0),
+	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		runKill()
 	},

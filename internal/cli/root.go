@@ -12,7 +12,7 @@ import (
 
 const version string = "0.0.1"
 
-// initalized when cli is called
+// initialized when cli is called
 var cfg internal.RCTConfig
 
 func handleStdin() string {
@@ -41,7 +41,7 @@ var rootCmd = &cobra.Command{
 	Use:     "rct [text to send]",
 	Version: version,
 	Short:   "rct is a tool for sending text between remote and local",
-	Args: cobra.MaximumNArgs(1),
+	Args:    cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		stat, _ := os.Stdin.Stat()
 		useStdin := (stat.Mode() & os.ModeCharDevice) == 0
@@ -50,7 +50,7 @@ var rootCmd = &cobra.Command{
 			txt = handleStdin()
 		} else {
 			if len(args) == 0 {
-				fmt.Fprintf(os.Stderr, "error: expected text (one arguement)\n")
+				fmt.Fprintf(os.Stderr, "error: expected text (one argument)\n")
 				os.Exit(1)
 			}
 			txt = args[0]
