@@ -20,6 +20,8 @@ The requirements for this project is as follows:
 
 rct will look for an `.rst.json` config file in your home directory.
 
+A config can be created with `gen-config` command.
+
 Here is a sample config.
 
 The `server` component is where rct will listen for incoming tcp connections.
