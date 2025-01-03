@@ -10,6 +10,7 @@ import (
 )
 
 const CFG_PATH = ".rct.json"
+const DEFAULT_PORT = "54321"
 
 /*
 {
@@ -55,6 +56,7 @@ type RCTConfig struct {
 	Delivery []Host `json:"delivery"`
 }
 
+
 func (c RCTConfig) Validate() error {
 	if c.Server.Addr == "" && len(c.Delivery) == 0 {
 		return fmt.Errorf("config must contain either server, delivery or both")
@@ -98,16 +100,39 @@ func ReadConfig() (RCTConfig, error) {
 	return readConfig(configPath)
 }
 
-func GenerateConfig(hostAddr string, deliveryAddrs []string) (RCTConfig, error) {
-	delivery := make([]Host, len(deliveryAddrs))
-	for i := range deliveryAddrs {
-		delivery[i] = Host{Addr: deliveryAddrs[i]}
+
+func getLocalIP() (string, error) {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		return "", err
 	}
-	hst := Host{Addr: hostAddr}
-	cfg := RCTConfig{
-		Server:   hst,
-		Delivery: delivery,
+	defer conn.Close()
+	localAddress := conn.LocalAddr().(*net.UDPAddr)
+	return localAddress.IP.String(), nil
+}
+
+func GenerateLocal(port string) (RCTConfig, error) {
+	ip, err := getLocalIP()
+	if err != nil {
+		return RCTConfig{}, err
 	}
-	err := cfg.Validate()
-	return cfg, err
+	addr := net.JoinHostPort(ip, port)
+	return RCTConfig{
+		Server: Host{Addr: addr},
+		Delivery: []Host{},
+	}, nil
+}
+
+func GenerateRemote(port string) (RCTConfig, error) {
+	ip, err := getLocalIP()
+	if err != nil {
+		return RCTConfig{}, err
+	}
+	addr := net.JoinHostPort(ip, port)
+	return RCTConfig{
+		Server: Host{},
+		Delivery: []Host{
+			{Addr: addr},
+		},
+	}, nil
 }
