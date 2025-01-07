@@ -25,6 +25,10 @@ func handleStdin() string {
 }
 
 func runSend(c internal.RCTConfig, txt string) {
+	if len(c.Delivery) == 0 {
+		fmt.Fprintf(os.Stderr, "no remotes specified. check config file.\n")
+		os.Exit(1)
+	}
 	if verbose {
 		fmt.Fprintf(os.Stdout, "sending text:\n%s\n", drawTextBox(txt))
 	}
