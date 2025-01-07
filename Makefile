@@ -11,6 +11,8 @@ GOFLAGS=
 # Targets for different OS/Architecture combinations
 build: clean build-linux build-windows build-macos
 
+build-dev: clean build-linux build-windows build-macos-dev
+
 build-linux:
 	GOOS=linux GOARCH=amd64 go build $(GOFLAGS) -ldflags="$(LDFLAGS)" -o $(OUTPUT_DIR)/$(BINARY_NAME)-linux-amd64 cmd/main.go
 
@@ -18,6 +20,9 @@ build-windows:
 	GOOS=windows GOARCH=amd64 go build $(GOFLAGS) -ldflags="$(LDFLAGS)" -o $(OUTPUT_DIR)/$(BINARY_NAME)-windows-amd64.exe cmd/main.go
 
 build-macos:
+	GOOS=darwin GOARCH=amd64 go build $(GOFLAGS) -ldflags="$(LDFLAGS)" -o $(OUTPUT_DIR)/$(BINARY_NAME)-darwin-amd64 cmd/main.go
+
+build-macos-dev:
 	GOOS=darwin GOARCH=amd64 go build $(GOFLAGS) -ldflags="$(LDFLAGS)" -o $(OUTPUT_DIR)/$(BINARY_NAME)-darwin-amd64 cmd/main.go
 	codesign -s - $(OUTPUT_DIR)/$(BINARY_NAME)-darwin-amd64
 
