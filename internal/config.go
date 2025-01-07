@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -135,4 +137,16 @@ func GenerateRemote(port string) (RCTConfig, error) {
 			{Addr: addr},
 		},
 	}, nil
+}
+
+func SendRemote(ctx context.Context, port string, username string, password string, remoteIP string) error {
+	cfg, err := GenerateRemote(port)
+	if err != nil {
+		return err
+	}
+	data, err := json.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+	return scpSendFile(ctx, username, password, remoteIP, CFG_PATH, bytes.NewReader(data))
 }
