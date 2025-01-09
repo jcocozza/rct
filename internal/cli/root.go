@@ -66,7 +66,10 @@ var rootCmd = &cobra.Command{
 
 func initConfig() {
 	c, err := internal.ReadConfig()
-	cobra.CheckErr(err)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to read config: %s\n", err.Error())
+		os.Exit(1)
+	}
 	cfg = c
 }
 

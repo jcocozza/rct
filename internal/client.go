@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"sync"
 )
 
 type Client struct {
@@ -69,27 +68,4 @@ func (c *Client) Send(txt string) error {
 		return fmt.Errorf("%s", string(errBuf))
 	}
 	return nil
-}
-
-// sendToHost sends the text to a single host and prints errors if verbose mode is enabled.
-func sendToHost(host Host, txt string) error {
-	client := NewClient(host.Addr, host.Token)
-	return client.Send(txt)
-}
-
-// deliver sends the text to all hosts concurrently and reports any errors.
-func deliver(hosts []Host, txt string) []error {
-	var wg sync.WaitGroup
-	errLst := make([]error, len(hosts))
-	for i, host := range hosts {
-		wg.Add(1)
-		go func(host Host) {
-			defer wg.Done()
-			if err := sendToHost(host, txt); err != nil {
-				errLst[i] = err
-			}
-		}(host)
-	}
-	wg.Wait()
-	return errLst
 }
