@@ -13,6 +13,7 @@ import (
 )
 
 const pid_file string = "rct.pid"
+const OK string = "ok"
 
 func savePID(pid int) error {
 	tmp := os.TempDir()
@@ -56,7 +57,12 @@ func respondError(conn net.Conn, err error) error {
 	return e
 }
 
-func (s *Server) handleConnection(conn net.Conn) {
+func respondOK(conn net.Conn) error {
+	_, e := conn.Write([]byte(OK))
+	return e
+}
+
+func (s *Server) handleConnection(conn net.Conn) error {
 	defer conn.Close()
 	reader := bufio.NewReader(conn)
 
@@ -66,20 +72,20 @@ func (s *Server) handleConnection(conn net.Conn) {
 		err := binary.Read(reader, binary.BigEndian, &tknLength)
 		if err != nil {
 			_ = respondError(conn, fmt.Errorf("unable to read token length"))
-			return
+			return err
 		}
 		tknBuf := make([]byte, tknLength)
 		_, err = io.ReadFull(reader, tknBuf)
 		if err != nil {
 			_ = respondError(conn, fmt.Errorf("unable to read token"))
-			return
+			return err
 		}
 		token := string(tknBuf)
 
 		// token validation
 		if token != s.token {
 			_ = respondError(conn, fmt.Errorf("invalid token"))
-			return
+			return err
 		}
 	}
 
@@ -88,25 +94,30 @@ func (s *Server) handleConnection(conn net.Conn) {
 	err := binary.Read(reader, binary.BigEndian, &msgLength)
 	if err != nil {
 		_ = respondError(conn, fmt.Errorf("unable to read message length"))
-		return
+		return err
 	}
 	msgBuf := make([]byte, msgLength)
 	_, err = io.ReadFull(reader, msgBuf)
 	if err != nil {
-		_ = respondError(conn, fmt.Errorf("unable to read message"))
-		return
+		msg := fmt.Sprintf("unable to read message %s", err.Error())
+		_ = respondError(conn, fmt.Errorf("%s", msg))
+		return err
 	}
 	// process message
-	//t := []byte(strings.ReplaceAll(string(msgBuf), `\n`, "\n"))
-	//err = s.clipboard.Write(t)
 	err = s.clipboard.Write(msgBuf)
 	if err != nil {
-		_ = respondError(conn, fmt.Errorf("failed to write to clipboard: %w", err))
-		return
+		msg := fmt.Sprintf("failed to write to clipboard: %s", err.Error())
+		_ = respondError(conn, fmt.Errorf("%s", msg))
+		return err
 	}
 	if s.results != nil {
 		s.results <- string(msgBuf)
 	}
+	err = respondOK(conn)
+	if err != nil {
+		return fmt.Errorf("unable to respond ok: %w", err)
+	}
+	return nil
 }
 
 func (s *Server) isAlive() bool {
@@ -134,7 +145,10 @@ func (s *Server) Run() error {
 			// TODO: handle these nicely
 			continue
 		}
-		s.handleConnection(conn)
+		err = s.handleConnection(conn)
+		if err != nil && s.results != nil {
+			s.results <- err.Error()
+		}
 	}
 }
 

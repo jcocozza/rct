@@ -58,14 +58,18 @@ func (c *Client) Send(txt string) error {
 	if err != nil {
 		return err
 	}
-
-	errBuf := make([]byte, 1024)
-	n, err := conn.Read(errBuf)
-	if err != nil && err != io.EOF {
+	responseBuf := make([]byte, 1024)
+	n, err := conn.Read(responseBuf)
+	if err != nil {
+		if err == io.EOF {
+			return nil
+		}
 		return err
 	}
-	if n != 0 {
-		return fmt.Errorf("%s", string(errBuf))
+	response := string(responseBuf[:n])
+	if response != OK {
+		return fmt.Errorf("received error from server: %s", response)
 	}
+
 	return nil
 }

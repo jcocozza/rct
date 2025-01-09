@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 const CFG_PATH = ".rct.json"
@@ -60,18 +61,22 @@ type RCTConfig struct {
 
 
 func (c RCTConfig) Validate() error {
-	if c.Server.Addr == "" && len(c.Delivery) == 0 {
-		return fmt.Errorf("config must contain either server, delivery or both")
-	}
-	err := c.Server.Validate()
-	if err != nil {
-		return err
-	}
-	for _, hst := range c.Delivery {
-		err := hst.Validate()
+	if strings.TrimSpace(c.Server.Addr) != "" {
+		err := c.Server.Validate()
 		if err != nil {
 			return err
 		}
+	}
+	if len(c.Delivery) > 0 {
+		for _, hst := range c.Delivery {
+			err := hst.Validate()
+			if err != nil {
+				return err
+			}
+		}
+	}
+	if strings.TrimSpace(c.Server.Addr) == "" && len(c.Delivery) == 0 {
+		return fmt.Errorf("config must contain either server, delivery or both")
 	}
 	return nil
 }
