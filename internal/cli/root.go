@@ -10,8 +10,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const version string = "0.0.2"
-
 // initialized when cli is called
 var cfg internal.RCTConfig
 
