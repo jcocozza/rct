@@ -29,7 +29,7 @@ func NewClient(serverAddr string, serverToken string) *Client {
 // 3. the message length
 // 3. the message
 func (c *Client) Send(txt string) error {
-	conn, err := net.Dial("tcp", c.ServerAddr)
+	conn, err := net.DialTimeout("tcp", c.ServerAddr, timeout)
 	if err != nil {
 		return err
 	}

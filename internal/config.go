@@ -8,10 +8,13 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const CFG_PATH = ".rct.json"
 const DEFAULT_PORT = "54321"
+const timeout = 3 * time.Second
+
 
 /*
 {

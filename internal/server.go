@@ -121,7 +121,7 @@ func (s *Server) handleConnection(conn net.Conn) error {
 }
 
 func (s *Server) isAlive() bool {
-	conn, err := net.Dial("tcp", s.Addr)
+	conn, err := net.DialTimeout("tcp", s.Addr, timeout)
 	if err != nil {
 		return false
 	}
