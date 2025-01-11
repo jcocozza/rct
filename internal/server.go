@@ -12,7 +12,9 @@ import (
 	"strconv"
 )
 
+// when the server runs detached, this file will be written to the tmp directory
 const pid_file string = "rct.pid"
+// the server will send this to the client
 const OK string = "ok"
 
 func savePID(pid int) error {
@@ -28,6 +30,15 @@ func savePID(pid int) error {
 		return fmt.Errorf("failed to write pid: %w", err)
 	}
 	return nil
+}
+
+// return pid if it exists, otherwise return the pid
+func ServerExists() int {
+	pid, err := readPID()
+	if err != nil {
+		return -1
+	}
+	return pid
 }
 
 type Server struct {
@@ -120,7 +131,7 @@ func (s *Server) handleConnection(conn net.Conn) error {
 	return nil
 }
 
-func (s *Server) isAlive() bool {
+func (s *Server) IsAlive() bool {
 	conn, err := net.DialTimeout("tcp", s.Addr, timeout)
 	if err != nil {
 		return false
@@ -130,7 +141,7 @@ func (s *Server) isAlive() bool {
 }
 
 func (s *Server) Run() error {
-	if s.isAlive() {
+	if s.IsAlive() {
 		return fmt.Errorf("server is already running")
 	}
 	listen, err := net.Listen("tcp", s.Addr)
@@ -155,7 +166,7 @@ func (s *Server) Run() error {
 // call the executable in its own process
 // return pid if success. -1 if failed to start
 func (s *Server) RunDetached() (int, error) {
-	if s.isAlive() {
+	if s.IsAlive() {
 		return -1, fmt.Errorf("server is already running")
 	}
 	exe, err := os.Executable()
