@@ -90,8 +90,6 @@ The client pushes data to the server where it is copied to the system clipboard.
 As such, the intended use of rct is running the rct server on your local machine as a background process with the rct client on the remote.
 (Typically, it is very easy to copy locally and paste into remote. The reverse is usually not so easy.)
 
-It is also important to not that the client will fail silently if verbose is not enabled.
-
 Where possible, rct tries to work with posix tools.
 For example `cat my_file.txt | rct` works just fine as a way to copy the text of a file to the local machine.
 
@@ -99,7 +97,9 @@ For example `cat my_file.txt | rct` works just fine as a way to copy the text of
 
 Using the diagram above, we have 2 config files (one on each machine).
 Notice that delivery on one matches server on the other (and vice versa).
+
 1. On remote (10.0.0.8)
+
 ```json
 {
   "server": {
@@ -114,7 +114,9 @@ Notice that delivery on one matches server on the other (and vice versa).
   ]
 }
 ```
+
 2. On local (10.0.0.6)
+
 ```json
 {
   "server": {
@@ -129,4 +131,3 @@ Notice that delivery on one matches server on the other (and vice versa).
   ]
 }
 ```
-

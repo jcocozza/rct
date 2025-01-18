@@ -33,7 +33,7 @@ func runSend(c internal.RCTConfig, txt string) {
 	for _, host := range c.Delivery {
 		client := internal.NewClient(host.Addr, host.Token)
 		err := client.Send(txt)
-		if err != nil && verbose {
+		if err != nil {
 			fmt.Fprintf(os.Stderr, "error: %s\n", err.Error())
 		}
 	}
