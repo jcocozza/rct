@@ -96,14 +96,14 @@ For example `cat my_file.txt | rct` works just fine as a way to copy the text of
 ## Example
 
 Using the diagram above, we have 2 config files (one on each machine).
-Notice that delivery on one matches server on the other (and vice versa).
+Notice that delivery on one matches server on the other.
 
 1. On remote (10.0.0.8)
 
 ```json
 {
   "server": {
-    "addr": "10.0.0.8:8080",
+    "addr": "",
     "token": ""
   },
   "delivery": [
@@ -125,7 +125,7 @@ Notice that delivery on one matches server on the other (and vice versa).
   },
   "delivery": [
     {
-      "addr": "10.0.0.8:8080",
+      "addr": "",
       "token": ""
     }
   ]
