@@ -21,6 +21,16 @@ func NewClient(serverAddr string, serverToken string) *Client {
 	}
 }
 
+// return nil if able to connect
+func (c *Client) Ping() error {
+	conn, err := net.DialTimeout("tcp", c.ServerAddr, timeout)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	return nil
+}
+
 // Send the txt to the server
 //
 // will send the following (in order):
