@@ -1,5 +1,7 @@
 # rct
 
+ARCHIVED because I discovered OSC52
+
 rct stands for remote copy text.
 
 I've found that when I'm working in a remote environment, there hasn't been a good way to copy text from remote to local.
